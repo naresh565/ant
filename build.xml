@@ -1,0 +1,74 @@
+<project name ="my project"  default = "testrun">
+<!-- defining the build properties --> 
+<property file="build.properties"/>
+
+<!--delete the existing Builds -->
+	<target name = "clean">
+	  <delete dir="build"/>
+	</target>
+	
+<!-- creating folder structure -->
+	<target name = "init" depends= "clean">
+	 <!-- <mkdir dir="build"/>-->
+	 <mkdir dir="build/web"/>
+	 <mkdir dir="build/test/classes"/>
+	 <mkdir dir="build/jar"/>
+	 <mkdir dir="${path}"/>
+	 <mkdir dir="build/dist"/>
+	 <mkdir dir="build/junit"/>
+	</target>
+<!--Compiling the java source code -->
+	
+	<target name = "compile" depends ="init">
+	 <javac srcdir="src/java"
+         destdir="${path}"
+         classpath="lib/junit.jar"
+         />
+	</target>
+<!--Creating the Jar file -->
+	
+	<target name = "jar" depends ="compile">
+	<jar destfile="build/jar/myproject-${appver}.jar" basedir="${path}"/>
+	</target>
+	
+<!--Copy web content from source to destination -->
+	<target name = "copy" depends ="jar">
+	  <copy todir="build/web">
+		<fileset dir="src/web"/>
+      </copy>
+	</target>
+	
+<!-- Creating the package/Build -->
+	<target name = "zip" depends ="copy"> 
+	<zip destfile="build/dist/myproject-${appver}.zip">
+    <fileset dir="build/jar"/>
+    <fileset dir="build/web"/>
+  </zip>
+	</target>
+<!-- junit test cases compilation -->
+	<target name ="compile-test" depends ="zip">
+	<javac srcdir="test"
+         destdir="build/test/classes"
+         classpath="${path}"
+         />
+	</target>
+	
+<!-- junit test cases execution and get the test report in xml format-->
+	<target name ="testrun" depends ="compile-test">
+	<junit dir="build/test/classes" fork="yes">
+						
+						<classpath>
+							<pathelement path="build/jar/app-${appversion}.jar"/>
+							<pathelement path="build/test/classes"/>
+							<pathelement path="lib/junit.jar"/>
+						</classpath>
+						<formatter type="xml"/>
+						<batchtest todir="build/junit">
+							<fileset dir="build/test/classes" >
+							</fileset>
+						</batchtest>
+		</junit>
+	</target>
+	
+	
+</project>
